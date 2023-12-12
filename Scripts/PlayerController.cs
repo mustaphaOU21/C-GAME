@@ -1,14 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
     public Camera playerCamera;
-    public float walkSpeed = 6f;
-    public float runSpeed = 12f;
-    public float jumpPower = 7f;
+    public float walkSpeed = 1f;
+    public float runSpeed = 3f;
+    public float jumpPower = 3f;
     public float gravity = 10f;
 
 
@@ -17,12 +18,10 @@ public class PlayerController : MonoBehaviour
 
     private bool canDestroyEnemy = false;
 
-
     Vector3 moveDirection = Vector3.zero;
     float rotationX = 0;
 
     public bool canMove = true;
-
 
     CharacterController characterController;
     void Start()
@@ -34,10 +33,10 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-
         #region Handles Movment
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
+
 
         // Press Left Shift to run
         bool isRunning = Input.GetKey(KeyCode.LeftShift);
@@ -45,7 +44,6 @@ public class PlayerController : MonoBehaviour
         float curSpeedY = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Horizontal") : 0;
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
-
         #endregion
 
         #region Handles Jumping
@@ -56,6 +54,7 @@ public class PlayerController : MonoBehaviour
         else
         {
             moveDirection.y = movementDirectionY;
+            
         }
 
         if (!characterController.isGrounded)
@@ -75,43 +74,27 @@ public class PlayerController : MonoBehaviour
             playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
             transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
         }
-
-        if (Input.GetMouseButtonDown(1))
-        {
-            canDestroyEnemy = true;
-        }
-
-        #endregion
-
-        #region handel click
-        if (Input.GetMouseButtonDown(0))
-        {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            
-            if (Physics.Raycast(ray, out hit))
-            {
-                BoxCollider bc = hit.collider as BoxCollider;
-                if (bc != null)
-                {
-                    Destroy(bc.gameObject);
-                }
-            }
-        }
         #endregion
     }
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (canDestroyEnemy && collision.gameObject.CompareTag("enemy"))
-        {
-            Destroy(collision.gameObject);
-        }
-    }
+    private int coinCount = 0;
+    private int requiredCoins = 11;
+
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("PowerUp"))
+        if (other.CompareTag("coin") || other.CompareTag("coin 2") || other.CompareTag("coin 3") ||
+            other.CompareTag("coin 4") || other.CompareTag("coin 5") || other.CompareTag("coin 6") ||
+            other.CompareTag("coin 7") || other.CompareTag("coin 8") || other.CompareTag("coin 9") ||
+            other.CompareTag("coin 10") || other.CompareTag("coin 11"))
         {
             Destroy(other.gameObject);
+
+            coinCount++;
+            Debug.Log("Collected Coin = " + coinCount);
+
+            if (coinCount == requiredCoins)
+            {
+                Debug.Log("Game is finish");
+            }
         }
     }
 }
